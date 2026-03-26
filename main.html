@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI/ML Engineer · MLOps · RAG & LLM</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #060910;
+      --surface:   #0c1018;
+      --border:    #1a2235;
+      --accent:    #3b82f6;
+      --accent2:   #06b6d4;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --tag-bg:    #0f1d33;
+      --tag-text:  #93c5fd;
+      --font-head: 'Syne', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ── GRID BACKGROUND ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── GLOW ORBS ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+      animation: pulse 8s ease-in-out infinite alternate;
+    }
+    .orb-1 { width: 500px; height: 500px; background: #1d4ed840; top: -100px; left: -100px; }
+    .orb-2 { width: 400px; height: 400px; background: #06b6d420; bottom: 0; right: -80px; animation-delay: -4s; }
+    @keyframes pulse { from { opacity: 0.6; } to { opacity: 1; } }
+
+    /* ── LAYOUT ── */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--border);
+      background: #060910cc;
+      backdrop-filter: blur(12px);
+    }
+    nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .nav-logo {
+      font-family: var(--font-head);
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-links { display: flex; gap: 32px; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent2); }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding-top: 56px;
+    }
+    .hero-inner { padding: 80px 0; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      color: var(--accent2);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+    .badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--accent2);
+      border-radius: 50%;
+      animation: blink 1.4s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+    h1 {
+      font-family: var(--font-head);
+      font-size: clamp(40px, 7vw, 76px);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -2px;
+      margin-bottom: 20px;
+    }
+    h1 .line2 { color: var(--accent); }
+
+    .hero-sub {
+      font-size: 14px;
+      color: var(--muted);
+      max-width: 520px;
+      margin-bottom: 32px;
+      line-height: 1.8;
+    }
+
+    .hero-quote {
+      border-left: 2px solid var(--accent);
+      padding: 12px 20px;
+      margin-bottom: 40px;
+      background: #0f1d3380;
+      border-radius: 0 8px 8px 0;
+      font-size: 13px;
+      color: var(--tag-text);
+      font-style: italic;
+      max-width: 560px;
+    }
+
+    .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--accent2); color: var(--accent2); transform: translateY(-1px); }
+
+    /* ── SECTION COMMON ── */
+    section { padding: 96px 0; }
+    .section-label {
+      font-size: 11px;
+      color: var(--accent2);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    h2 {
+      font-family: var(--font-head);
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 48px;
+      line-height: 1.1;
+    }
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── ABOUT ── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+    @media (max-width: 640px) { .about-grid { grid-template-columns: 1fr; } }
+
+    .about-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+    }
+    .about-card h3 {
+      font-family: var(--font-head);
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .about-card p { color: var(--muted); font-size: 13px; line-height: 1.8; }
+    .stat { font-size: 36px; font-family: var(--font-head); font-weight: 800; color: var(--accent); }
+    .stat-label { color: var(--muted); font-size: 12px; margin-top: 4px; }
+
+    /* ── STACK ── */
+    .stack-group { margin-bottom: 36px; }
+    .stack-group-title {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+    .tags { display: flex; flex-wrap: wrap; gap: 10px; }
+    .tag {
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      border: 1px solid #1e3a5f;
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      transition: all 0.2s;
+    }
+    .tag:hover { border-color: var(--accent); color: var(--text); transform: translateY(-2px); }
+
+    /* ── PROJECTS ── */
+    .project-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 20px;
+      transition: border-color 0.2s, transform 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .project-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+    .project-card:hover::before { opacity: 1; }
+    .project-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; gap: 16px; }
+    .project-title {
+      font-family: var(--font-head);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .project-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #34d399;
+      background: #064e3b30;
+      border: 1px solid #065f4640;
+      padding: 3px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .project-status::before { content: ''; width: 6px; height: 6px; background: #34d399; border-radius: 50%; animation: blink 2s infinite; }
+    .project-desc { color: var(--muted); font-size: 13px; line-height: 1.8; margin-bottom: 20px; }
+    .project-stack { display: flex; flex-wrap: wrap; gap: 8px; }
+    .project-tag {
+      font-size: 11px;
+      color: var(--muted);
+      background: #0d1520;
+      border: 1px solid var(--border);
+      padding: 3px 10px;
+      border-radius: 4px;
+    }
+
+    /* ── CONNECT ── */
+    #connect { text-align: center; }
+    #connect h2 { margin-bottom: 16px; }
+    #connect p { color: var(--muted); max-width: 480px; margin: 0 auto 40px; font-size: 13px; }
+    .connect-links { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* ── FADE IN ── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="container">
+    <a class="nav-logo" href="#">[Your Name]<span>.</span></a>
+    <div class="nav-links">
+      <a href="#about">About</a>
+      <a href="#stack">Stack</a>
+      <a href="#projects">Projects</a>
+      <a href="#connect">Connect</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-inner fade-up">
+      <div class="badge">Open to opportunities</div>
+      <h1>
+        AI/ML Engineer<br>
+        <span class="line2">& MLOps Architect</span>
+      </h1>
+      <p class="hero-sub">
+        I build production-grade AI/ML systems — from pipelines to deployed APIs — 
+        with a focus on reproducibility, scalability, and long-term maintainability.
+        RAG · LLMs · Computer Vision · Tabular ML.
+      </p>
+      <div class="hero-quote">
+        "Don't just build for today — architect for scale, engineer for longevity, and deploy with conviction."
+      </div>
+      <div class="hero-ctas">
+        <a href="#projects" class="btn btn-primary">↓ View Projects</a>
+        <a href="https://huggingface.co/spaces/udituen" target="_blank" class="btn btn-ghost">🤗 HuggingFace Spaces</a>
+        <a href="#connect" class="btn btn-ghost">Get in touch</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+    <p class="section-label fade-up">Background</p>
+    <h2 class="fade-up">About Me</h2>
+    <div class="about-grid">
+      <div class="about-card fade-up">
+        <h3>Who I Am</h3>
+        <p>
+          An AI/ML Engineer who obsesses over the full lifecycle — from raw data to serving at scale.
+          I care deeply about clean pipelines, reproducible experiments, and systems that don't break at 3am.
+        </p>
+      </div>
+      <div class="about-card fade-up">
+        <h3>What I Do</h3>
+        <p>
+          I bridge the gap between research and production: training models with modern architectures,
+          then shipping them reliably using MLOps tooling on cloud infrastructure.
+        </p>
+      </div>
+      <div class="about-card fade-up" style="text-align:center;">
+        <div class="stat">4+</div>
+        <div class="stat-label">Years in AI/ML</div>
+      </div>
+      <div class="about-card fade-up" style="text-align:center;">
+        <div class="stat">2+</div>
+        <div class="stat-label">Years in Software Engineering</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- STACK -->
+<section id="stack">
+  <div class="container">
+    <p class="section-label fade-up">Technologies</p>
+    <h2 class="fade-up">Tech Stack</h2>
+
+    <div class="stack-group fade-up">
+      <div class="stack-group-title">AI / ML Frameworks</div>
+      <div class="tags">
+        <span class="tag">Python</span>
+        <span class="tag">TensorFlow</span>
+        <span class="tag">PyTorch</span>
+        <span class="tag">scikit-learn</span>
+        <span class="tag">TabNet</span>
+        <span class="tag">VIME</span>
+        <span class="tag">YOLOvX</span>
+        <span class="tag">CLIP</span>
+      </div>
+    </div>
+
+    <div class="stack-group fade-up">
+      <div class="stack-group-title">MLOps & Infrastructure</div>
+      <div class="tags">
+        <span class="tag">Docker</span>
+        <span class="tag">Kubernetes</span>
+        <span class="tag">Apache Airflow</span>
+        <span class="tag">GCP</span>
+        <span class="tag">Cloud Run</span>
+        <span class="tag">GitHub Actions</span>
+      </div>
+    </div>
+
+    <div class="stack-group fade-up">
+      <div class="stack-group-title">APIs & Data</div>
+      <div class="tags">
+        <span class="tag">FastAPI</span>
+        <span class="tag">Streamlit</span>
+        <span class="tag">SQL</span>
+      </div>
+    </div>
+
+    <div class="stack-group fade-up">
+      <div class="stack-group-title">Specialisations</div>
+      <div class="tags">
+        <span class="tag">RAG Systems</span>
+        <span class="tag">LLM Engineering</span>
+        <span class="tag">Computer Vision</span>
+        <span class="tag">Tabular ML</span>
+        <span class="tag">Self-Supervised Learning</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="container">
+    <p class="section-label fade-up">Work</p>
+    <h2 class="fade-up">Featured Projects</h2>
+
+    <div class="project-card fade-up">
+      <div class="project-header">
+        <div class="project-title">Diabetes Readmission · MLOps on GCP</div>
+        <span class="project-status">In Progress</span>
+      </div>
+      <p class="project-desc">
+        End-to-end MLOps pipeline for predicting hospital readmissions for diabetic patients.
+        Built with a production-first mindset: reproducible training pipelines, containerized APIs,
+        automated CI/CD, and cloud-native deployment. Designed to scale and stay auditable.
+      </p>
+      <div class="project-stack">
+        <span class="project-tag">scikit-learn</span>
+        <span class="project-tag">FastAPI</span>
+        <span class="project-tag">Docker</span>
+        <span class="project-tag">GCP Cloud Run</span>
+        <span class="project-tag">GitHub Actions</span>
+        <span class="project-tag">Python</span>
+      </div>
+    </div>
+
+    <div class="project-card fade-up">
+      <div class="project-header">
+        <div class="project-title">HuggingFace Spaces</div>
+        <span class="project-status">Live</span>
+      </div>
+      <p class="project-desc">
+        A collection of live ML demos and experiments hosted on HuggingFace Spaces — 
+        bringing models out of notebooks and into interactive interfaces.
+      </p>
+      <div class="project-stack">
+        <span class="project-tag">Streamlit</span>
+        <span class="project-tag">HuggingFace</span>
+        <span class="project-tag">Python</span>
+      </div>
+      <div style="margin-top:18px;">
+        <a href="https://huggingface.co/spaces/udituen" target="_blank" class="btn btn-ghost" style="font-size:12px;">
+          → View on HuggingFace
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- CONNECT -->
+<section id="connect">
+  <div class="container">
+    <p class="section-label">Contact</p>
+    <h2>Let's Build Something</h2>
+    <p>Open to roles, collaborations, and interesting problems in AI/ML and MLOps.</p>
+    <div class="connect-links">
+      <a href="https://YOUR_GITHUB_USERNAME.github.io" class="btn btn-ghost">⚡ GitHub</a>
+      <a href="https://huggingface.co/spaces/udituen" target="_blank" class="btn btn-primary">🤗 HuggingFace</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <p>Built with care. Deployed with conviction. <span style="color:var(--accent)">// [Your Name]</span></p>
+  </div>
+</footer>
+
+<script>
+  // Fade-in on scroll
+  const els = document.querySelectorAll('.fade-up');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  els.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
